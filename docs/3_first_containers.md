@@ -2,7 +2,9 @@
 
 ## Pod とは
 
-Kubernetes でコンテナをデプロイする一番原始的な方法は、Pod というリソースを定義することです。
+Kubernetes でコンテナをデプロイする一番原始的な方法は、Pod というリソースを定義することです。[^1]
+
+[^1]: https://kubernetes.io/docs/concepts/workloads/pods/
 
 Pod は、複数のコンテナ（docker コンテナと同等と思ってもらって良いです）をまとめたものです。
 プロセス（PID）空間やファイルシステム空間は、docker と同様に、コンテナごとに分離されます。

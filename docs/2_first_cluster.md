@@ -72,7 +72,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 クラスターを立ち上げたため、docker コンテナがいくつか立ち上がっているはずです。
 
-`docker ps` と打って、確認してみましょう。
+`docker ps` と打って、確認します。
 
 ```plaintext
 $ docker ps
@@ -88,7 +88,7 @@ b1a3e0de477b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 min
                      k3d-hands-on-server-0
 ```
 
-次のコンテナが確認できると思います。
+次のコンテナが確認できます。
 
 - 「server」のコンテナが一つ
     - 「Control plane」の役割をします。
@@ -97,7 +97,7 @@ b1a3e0de477b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 min
 - 「serverlb」のコンテナが一つ
     - k3d 独自の概念のため、あまり気にしないで良いです。手元のマシン（ホスト側）と docker コンテナの橋渡しをします。
 
-`kubectl get nodes` と打って、Kubernetes クラスターに認識されているノードを確認してみましょう。
+`kubectl get nodes` と打って、Kubernetes クラスターに認識されているノードを確認します。
 
 ```shell
 $ kubectl get nodes
@@ -108,7 +108,7 @@ k3d-hands-on-agent-1    Ready    <none>                 11m   v1.28.8+k3s1
 k3d-hands-on-agent-0    Ready    <none>                 11m   v1.28.8+k3s1
 ```
 
-serverlb 以外は、似た結果が得られるはずです。
+serverlb 以外は、`docker ps` と似た結果が得られます。
 
 Kubernetes は、「司令塔」である「Control plane」と、実際にユーザーのコンテナ（アプリケーション）が動く「Worker nodes」に、大きく分かれています。
 

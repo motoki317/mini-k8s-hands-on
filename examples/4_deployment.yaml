@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+
+spec:
+  # 3つのレプリカ（Pod）を定義
+  replicas: 3
+
+  # 管理対象とする Pod のセレクター
+  selector:
+    matchLabels:
+      app: caddy
+
+  # 各 Pod のテンプレート
+  template:
+    # ここで上のセレクターと同じラベルを付ける
+    metadata:
+      labels:
+        app: caddy
+    # 以下は通常の Pod の定義
+    spec:
+      containers:
+        - name: caddy
+          image: caddy:2.6

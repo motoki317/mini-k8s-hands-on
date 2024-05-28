@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+
+spec:
+  # StatefulSet が管理する Pod にアクセスするための Service 名
+  serviceName: redis
+
+  # 1つのレプリカ（Pod）を定義
+  replicas: 1
+
+  # 管理対象とする Pod のセレクター
+  selector:
+    matchLabels:
+      app: redis
+
+  # 各 Pod のテンプレート
+  template:
+    # ここで上のセレクターと同じラベルを付ける
+    metadata:
+      labels:
+        app: redis
+    # 以下は通常の Pod の定義
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+
+---
+# StatefulSet にアクセスするための Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+
+spec:
+  type: ClusterIP
+  selector:
+    app: redis
+  ports:
+    - name: redis
+      port: 6379
