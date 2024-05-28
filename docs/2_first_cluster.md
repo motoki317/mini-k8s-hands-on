@@ -6,10 +6,10 @@ Kubernetes のインスタンスは「クラスター」と呼ばれます。
 通常、複数の Linux ホスト（ノード）を管理するためです。
 
 今回は、お手持ちの一つのマシンでハンズオンを行いたいため、
-一つの docker コンテナを「一つの仮想的な Linux ホスト」として使っていきます。
+「一つの docker コンテナ」を「一つの仮想的な Linux ホスト」として使います。
 これを可能にするツールの一つが、「k3d」です。
 
-次のコマンドを実行しましょう。
+次のコマンドを実行して、クラスターを立ち上げます。
 
 - `k3d cluster create hands-on --agents 3 --k3s-arg "--disable=traefik@server:*"`
     - 細かい引数は後ほど解説します。そのままコピペしてください。
@@ -49,7 +49,7 @@ INFO[0031] You can now use it like this:
 kubectl cluster-info
 ```
 
-出力の最後でアドバイスがある通り、`kubectl cluster-info` も実行してみましょう。
+出力の最後でアドバイスがある通り、`kubectl cluster-info` を実行してみましょう。
 
 次のような出力が出たら成功です。
 
@@ -64,12 +64,13 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 クラスターに関する、基本的な情報を表示してくれます。
 `0.0.0.0:38735`、つまりローカルにある「Kubernetes control plane」に接続していることが分かります。
-（ポート番号は毎回異なるはずですが、気にしないで良いです。）
+（ポート番号は毎回異なりますが、気にしないで良いです。）
 
 ## ノードの確認
 
-さて、先ほど「k3d」は、一つの docker コンテナを「一つの仮想的な Linux ホスト」として使うと書きました。
-この状態では、docker コンテナがいくつか立ち上がっているはずです。
+さて先ほど、k3dは「一つの docker コンテナ」を「一つの仮想的な Linux ホスト」として使うと書きました。
+
+クラスターを立ち上げたため、docker コンテナがいくつか立ち上がっているはずです。
 
 `docker ps` と打って、確認してみましょう。
 
@@ -96,7 +97,7 @@ b1a3e0de477b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 min
 - 「serverlb」のコンテナが一つ
     - k3d 独自の概念のため、あまり気にしないで良いです。手元のマシン（ホスト側）と docker コンテナの橋渡しをします。
 
-`kubectl get nodes` でも確認してみましょう。
+`kubectl get nodes` と打って、Kubernetes クラスターに認識されているノードを確認してみましょう。
 
 ```shell
 $ kubectl get nodes
@@ -109,9 +110,9 @@ k3d-hands-on-agent-0    Ready    <none>                 11m   v1.28.8+k3s1
 
 serverlb 以外は、似た結果が得られるはずです。
 
-Kubernetesでは、「司令塔」である「Control plane」と、実際にユーザーのコンテナ（アプリケーション）が動く「Worker nodes」は分かれています。
+Kubernetes は、「司令塔」である「Control plane」と、実際にユーザーのコンテナ（アプリケーション）が動く「Worker nodes」に、大きく分かれています。
 
-ここでは、2種類あることが確認できれば良いです。
+ここでは、この2種類があることが確認できれば良いです。
 
 ![kubernetes components](https://kubernetes.io/images/docs/components-of-kubernetes.svg)
 
@@ -122,13 +123,13 @@ Kubernetesクラスターを構成するコンポーネント[^1]
 ## クラスターの終了
 
 k3d を使うことで、いつでもハンズオンを終了できます。
-ただし、**クラスターのデータは保存されません**。
+ただし、**クラスターの状態は保存されません**。
 
 次のコマンドで、クラスターを完全に削除します。
 
 - `k3d cluster delete hands-on`
 
-再開する時は、最初に行った cluster create コマンドで、再度クラスターを作成します。
+再開する時は、最初に行った k3d cluster create コマンドで、再度クラスターを作成します。
 
 本当に簡単なので、この時点でクラスターを一度削除して、再作成してみると面白いかもしれません。
 

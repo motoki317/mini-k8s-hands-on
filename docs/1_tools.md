@@ -11,7 +11,8 @@
 
 目的:
 Windows の場合、WSL2 を使うことで Linux 環境にかなり近づきます。
-Docker や Kubernetes などのコンテナ環境は、主に Linux 環境を想定しているため、これらを試す際は Linux 環境で行うことを強くおすすめします。
+Docker や Kubernetes などのコンテナ環境は、主に Linux 環境を想定しています。
+これらを試す際は Linux 環境で行うことを強くおすすめします。
 
 方法:
 

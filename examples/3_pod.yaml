@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: caddy
+
+spec:
+  containers:
+    - name: caddy
+      image: caddy:2
