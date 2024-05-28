@@ -133,13 +133,13 @@ caddy-766687f85d-mmkl6   1/1     Running   0          6m7s
 
 次のコマンドで、Deployment の Pod **群**へ port-forward を行います。
 
-- `kubectl port-forward deployment/caddy 8080:80`
+- `kubectl port-forward deployment/caddy 8000:80`
 
 「Pod **群**へ port-forward する」と、各HTTPリクエストが 3 つの Pod のうちいずれか 1 つに渡るという挙動になります。
 最も基本的なロードバランシングです。
 （正確な挙動は、次ページの Service, Ingress の項で説明します。）
 
-https://localhost:8080/ へアクセスし、再度次の画面が見えたら成功です。
+https://localhost:8000/ へアクセスし、再度次の画面が見えたら成功です。
 
 ![caddy-hello-world](../images/3_caddy_hello_world.png)
 
@@ -264,6 +264,7 @@ spec:
   ports:
     - name: redis
       port: 6379
+      targetPort: 6379
 ```
 
 Deployment と同じフィールドは説明を省きますが、一つ必須なフィールドが増えました。

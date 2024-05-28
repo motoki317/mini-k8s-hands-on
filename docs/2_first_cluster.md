@@ -11,41 +11,40 @@ Kubernetes のインスタンスは「クラスター」と呼ばれます。
 
 次のコマンドを実行して、クラスターを立ち上げます。
 
-- `k3d cluster create hands-on --agents 3 --k3s-arg "--disable=traefik@server:*"`
+- `k3d cluster create hands-on --agents 3 --port "80:80@loadbalancer" --port "8080:8080@loadbalancer"`
     - 細かい引数は後ほど解説します。そのままコピペしてください。
 
 私の環境では30秒ほど掛かります。
 次のような出力が出たら成功です。
 
 ```plaintext
-$ k3d cluster create hands-on --agents 3 --k3s-arg "--disable=traefik@server:*"
+$ k3d cluster create hands-on --agents 3 --port "80:80@loadbalancer" --port "8080:8080@loadbalancer"
+INFO[0000] portmapping '80:80' targets the loadbalancer: defaulting to [servers:*:proxy agents:*:proxy]
+INFO[0000] portmapping '8080:8080' targets the loadbalancer: defaulting to [servers:*:proxy agents:*:proxy]
 INFO[0000] Prep: Network
 INFO[0000] Created network 'k3d-hands-on'
-INFO[0000] Created image volume k3d-hands-on-images
+INFO[0000] Created image volume k3d-hands-on-images     
 INFO[0000] Starting new tools node...
+INFO[0000] Starting node 'k3d-hands-on-tools'
 INFO[0001] Creating node 'k3d-hands-on-server-0'        
-INFO[0001] Pulling image 'ghcr.io/k3d-io/k3d-tools:5.6.3' 
-INFO[0003] Pulling image 'docker.io/rancher/k3s:v1.28.8-k3s1' 
-INFO[0003] Starting node 'k3d-hands-on-tools'
-INFO[0010] Creating node 'k3d-hands-on-agent-0'
-INFO[0010] Creating node 'k3d-hands-on-agent-1'
-INFO[0010] Creating node 'k3d-hands-on-agent-2'
-INFO[0010] Creating LoadBalancer 'k3d-hands-on-serverlb' 
-INFO[0011] Pulling image 'ghcr.io/k3d-io/k3d-proxy:5.6.3' 
-INFO[0015] Using the k3d-tools node to gather environment information 
-INFO[0015] HostIP: using network gateway 172.16.5.1 address 
-INFO[0015] Starting cluster 'hands-on'
-INFO[0015] Starting servers...
-INFO[0015] Starting node 'k3d-hands-on-server-0'        
-INFO[0018] Starting agents...
-INFO[0018] Starting node 'k3d-hands-on-agent-1'
-INFO[0018] Starting node 'k3d-hands-on-agent-0'
-INFO[0018] Starting node 'k3d-hands-on-agent-2'
-INFO[0023] Starting helpers...
-INFO[0023] Starting node 'k3d-hands-on-serverlb'
-INFO[0029] Injecting records for hostAliases (incl. host.k3d.internal) and for 5 network members into CoreDNS configmap...
-INFO[0031] Cluster 'hands-on' created successfully!     
-INFO[0031] You can now use it like this:
+INFO[0001] Creating node 'k3d-hands-on-agent-0'
+INFO[0001] Creating node 'k3d-hands-on-agent-1'
+INFO[0001] Creating node 'k3d-hands-on-agent-2'
+INFO[0001] Creating LoadBalancer 'k3d-hands-on-serverlb' 
+INFO[0001] Using the k3d-tools node to gather environment information 
+INFO[0001] HostIP: using network gateway 172.16.7.1 address 
+INFO[0001] Starting cluster 'hands-on'
+INFO[0001] Starting servers...
+INFO[0001] Starting node 'k3d-hands-on-server-0'        
+INFO[0004] Starting agents...
+INFO[0004] Starting node 'k3d-hands-on-agent-0'
+INFO[0004] Starting node 'k3d-hands-on-agent-2'
+INFO[0004] Starting node 'k3d-hands-on-agent-1'
+INFO[0008] Starting helpers...
+INFO[0008] Starting node 'k3d-hands-on-serverlb'
+INFO[0014] Injecting records for hostAliases (incl. host.k3d.internal) and for 5 network members into CoreDNS configmap...
+INFO[0016] Cluster 'hands-on' created successfully!     
+INFO[0016] You can now use it like this:
 kubectl cluster-info
 ```
 
@@ -55,15 +54,15 @@ kubectl cluster-info
 
 ```plaintext
 $ kubectl cluster-info
-Kubernetes control plane is running at https://0.0.0.0:38735
-CoreDNS is running at https://0.0.0.0:38735/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-Metrics-server is running at https://0.0.0.0:38735/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
+Kubernetes control plane is running at https://0.0.0.0:41407
+CoreDNS is running at https://0.0.0.0:41407/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://0.0.0.0:41407/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
 クラスターに関する、基本的な情報を表示してくれます。
-`0.0.0.0:38735`、つまりローカルにある「Kubernetes control plane」に接続していることが分かります。
+`0.0.0.0:41407`、つまりローカルにある「Kubernetes control plane」に接続していることが分かります。
 （ポート番号は毎回異なりますが、気にしないで良いです。）
 
 ## ノードの確認
@@ -76,16 +75,12 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ```plaintext
 $ docker ps
-CONTAINER ID   IMAGE                            COMMAND                  CREATED         STATUS         PORTS                             NAMES
-955026d6cad1   ghcr.io/k3d-io/k3d-proxy:5.6.3   "/bin/sh -c nginx-pr…"   5 minutes ago   Up 5 minutes   80/tcp, 0.0.0.0:38735->6443/tcp   k3d-hands-on-serverlb
-63d93d25d2c1   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 minutes ago   Up 5 minutes                
-                     k3d-hands-on-agent-2
-2c8ea7d6312b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 minutes ago   Up 5 minutes                
-                     k3d-hands-on-agent-1
-9893c7d63cb9   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 minutes ago   Up 5 minutes                
-                     k3d-hands-on-agent-0
-b1a3e0de477b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   5 minutes ago   Up 5 minutes                
-                     k3d-hands-on-server-0
+CONTAINER ID   IMAGE                            COMMAND                  CREATED         STATUS         PORTS                                                                                                   NAMES
+494f2c661714   ghcr.io/k3d-io/k3d-proxy:5.6.3   "/bin/sh -c nginx-pr…"   2 minutes ago   Up 2 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp, 0.0.0.0:41407->6443/tcp   k3d-hands-on-serverlb
+48517abfd362   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   2 minutes ago   Up 2 minutes                                                                                                           k3d-hands-on-agent-2
+8b209ec273c4   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   2 minutes ago   Up 2 minutes                                                                                                           k3d-hands-on-agent-1
+e2606a53776b   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   2 minutes ago   Up 2 minutes                                                                                                           k3d-hands-on-agent-0
+c1c01542434e   rancher/k3s:v1.28.8-k3s1         "/bin/k3d-entrypoint…"   2 minutes ago   Up 2 minutes                                                                                                           k3d-hands-on-server-0
 ```
 
 次のコンテナが確認できます。

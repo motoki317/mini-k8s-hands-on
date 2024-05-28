@@ -97,19 +97,19 @@ Pod 1つだけではあまり実感が沸かないかもしれませんが、コ
 
 次のコマンドで、Pod 内のポートに接続できます。
 
-- `kubectl port-forward pod/caddy 8080:80`
-    - `caddy` という名前の Pod の 80 番ポートに、ローカルの 8080 番ポートから接続できるようにする、という意味です。
+- `kubectl port-forward pod/caddy 8000:80`
+    - `caddy` という名前の Pod の 80 番ポートに、ローカルの 8000 番ポートから接続できるようにする、という意味です。
 
 次のような出力が出たら、port-forward が成功しています。
 コマンドは終了しませんが、これで正常です。
 
 ```plaintext
-$ kubectl port-forward pod/caddy 8080:80
-Forwarding from 127.0.0.1:8080 -> 80
-Forwarding from [::1]:8080 -> 80
+$ kubectl port-forward pod/caddy 8000:80
+Forwarding from 127.0.0.1:8000 -> 80
+Forwarding from [::1]:8000 -> 80
 ```
 
-https://localhost:8080/ にブラウザからアクセスし、次のWebページが見えたら成功です。
+https://localhost:8000/ にブラウザからアクセスし、次のWebページが見えたら成功です。
 
 ![caddy-hello-world](../images/3_caddy_hello_world.png)
 

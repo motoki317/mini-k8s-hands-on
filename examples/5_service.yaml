@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: caddy
+
+spec:
+  # Service の種類
+  type: ClusterIP
+  # Pod のセレクター
+  selector:
+    app: caddy
+  # サービスの port 一覧
+  ports:
+    - name: web
+      protocol: TCP  # 省略可能 (default: TCP)
+      port: 80       # Service が提供するポート番号
+      targetPort: 80 # Pod の宛先ポート番号
