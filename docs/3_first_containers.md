@@ -109,7 +109,7 @@ Forwarding from [::1]:8080 -> 80
 
 https://localhost:8080/ にブラウザからアクセスし、次のWebページが見えたら成功です。
 
-![caddy-hello-world](../images/caddy-hello-world.png)
+![caddy-hello-world](../images/3_caddy_hello_world.png)
 
 ページが確認できたら、port-forward コマンドを CTRL+C で終了します。
 
