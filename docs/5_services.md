@@ -398,6 +398,6 @@ caddy   traefik   caddy.local.trapti.tech   172.16.7.2,172.16.7.3,172.16.7.4,172
 お疲れ様でした！
 ここでは、デプロイした Pod へ実際にどう外部・内部からアクセスするかを学びました。
 
-次では、ConfigMap と Secret を使って、より Pod をカスタマイズしていく方法を学びます。
+次では、ConfigMap や Secret、Volume Mount を使って、より Pod をカスタマイズしていく方法を学びます。
 
 [./6_pod_config.md](./6_pod_config.md)

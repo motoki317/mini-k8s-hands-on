@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-html-files
+
+data:
+  index.html: |
+    <html lang='en'>
+      <body>
+        <div>Hello from ConfigMap!</div>
+      </body>
+    </html>
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: caddy
+
+spec:
+  volumes:
+    - name: my-cf-volume
+      configMap:
+        name: my-html-files
+  containers:
+    - name: caddy
+      image: caddy:2
+      volumeMounts:
+        - name: my-cf-volume # .spec.volumes[].name で定義した名前
+          mountPath: /usr/share/caddy
