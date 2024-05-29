@@ -1,0 +1,5 @@
+resources:
+  - mariadb.yaml
+  - traq.yaml
+  - traq-ui.yaml
+  - ingress.yaml

@@ -23,5 +23,5 @@ spec:
           value: password
       volumeMounts:
         # コンテナ内の /var/lib/mysql に Volume Mount
-        - name: data
-          mountPath: /var/lib/mysql
+        - mountPath: /var/lib/mysql
+          name: data

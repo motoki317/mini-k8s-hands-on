@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traq
+
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: traq.local.trapti.tech
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traq-ui
+                port:
+                  number: 80
+
+          - path: /api
+            pathType: Prefix
+            backend: &traq-backend
+              service:
+                name: traq
+                port:
+                  number: 80
+
+          - path: /.well-known
+            pathType: Prefix
+            backend:
+              <<: *traq-backend

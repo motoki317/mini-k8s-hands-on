@@ -16,5 +16,5 @@ spec:
         - name: MARIADB_ROOT_PASSWORD
           value: password
       volumeMounts:
-        - name: data
-          mountPath: /var/lib/mysql
+        - mountPath: /var/lib/mysql
+          name: data

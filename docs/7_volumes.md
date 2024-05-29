@@ -33,14 +33,14 @@ spec:
     - name: demo-1
       image: demo:latest
       volumeMounts:
-        - name: my-shared-vol
-          mountPath: /mount-point-1
+        - mountPath: /mount-point-1
+          name: my-shared-vol
 
     - name: demo-2
       image: demo:latest
       volumeMounts:
-        - name: my-shared-vol
-          mountPath: /mount-point-2
+        - mountPath: /mount-point-2
+          name: my-shared-vol
 ```
 
 Pod は**複数コンテナ**から構成可能なことを思い出し、Volume はコンテナではなく **Pod 単位で紐づく**ことに注目してください。
@@ -132,8 +132,8 @@ spec:
           value: password
       volumeMounts:
         # コンテナ内の /var/lib/mysql に Volume Mount
-        - name: data
-          mountPath: /var/lib/mysql
+        - mountPath: /var/lib/mysql
+          name: data
 ```
 
 [../examples/7_hostpath_pod.yaml](../examples/7_hostpath_pod.yaml)
@@ -311,8 +311,8 @@ spec:
         - name: MARIADB_ROOT_PASSWORD
           value: password
       volumeMounts:
-        - name: data
-          mountPath: /var/lib/mysql
+        - mountPath: /var/lib/mysql
+          name: data
 ```
 
 PVC の定義を少し解説します。
@@ -457,8 +457,8 @@ spec:
         - name: MARIADB_ROOT_PASSWORD
           value: password
       volumeMounts:
-        - name: data
-          mountPath: /var/lib/mysql
+        - mountPath: /var/lib/mysql
+          name: data
 ```
 
 [../examples/7_pvc_pod.yaml](../examples/7_pvc_pod.yaml)
@@ -515,4 +515,4 @@ Pod と PVC を削除しておきましょう。
 これで**本当に基本的な Kubernetes の要素**は一通り学びました。
 次のページでは、演習として [traQ](https://github.com/traPtitech/traQ) のデプロイに挑戦します。
 
-[./8_exercise.yaml](./8_exercise.yaml)
+[./8_exercise.md](./8_exercise.md)

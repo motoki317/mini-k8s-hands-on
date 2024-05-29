@@ -26,5 +26,5 @@ spec:
     - name: caddy
       image: caddy:2
       volumeMounts:
-        - name: my-cf-volume # .spec.volumes[].name で定義した名前
-          mountPath: /usr/share/caddy
+        - mountPath: /usr/share/caddy
+          name: my-cf-volume # .spec.volumes[].name で定義した名前

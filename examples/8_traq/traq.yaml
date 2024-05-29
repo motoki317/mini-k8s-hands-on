@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traq
+
+spec:
+  type: ClusterIP
+  selector:
+    app: traq
+  ports:
+    - name: traq
+      port: 80
+      targetPort: 3000
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traq
+
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traq
+
+data:
+  config.yml: |
+    origin: http://traq.local.trapti.tech
+    port: 3000
+    allowSignUp: true
+    
+    mariadb:
+      host: mariadb
+      port: 3306
+      username: traq
+      # password: <env secret>
+      database: traq
+    
+    storage:
+      type: local
+      local:
+        dir: /app/storage
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: traq
+
+spec:
+  serviceName: traq
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: traq
+
+  template:
+    metadata:
+      labels:
+        app: traq
+    spec:
+      enableServiceLinks: false
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: traq
+        - name: config
+          configMap:
+            name: traq
+
+      containers:
+        - name: traq
+          image: ghcr.io/traptitech/traq:latest
+          env:
+            - name: TRAQ_MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-password
+                  key: traq-password
+
+          volumeMounts:
+            - mountPath: /app/storage
+              name: data
+            - mountPath: /app/config.yml
+              name: config
+              subPath: config.yml
+              readOnly: true

@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traq-ui
+
+data:
+  config.js: |
+    ;(() => {
+      const config = {
+        enableSearch: false,
+        isRootChannelSelectableAsParentChannel: true
+      }
+    
+      self.traQConfig = config
+    })()
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traq-ui
+
+spec:
+  type: ClusterIP
+  selector:
+    app: traq-ui
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traq-ui
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traq-ui
+
+  template:
+    metadata:
+      labels:
+        app: traq-ui
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: traq-ui
+
+      containers:
+        - name: traq-ui
+          image: ghcr.io/traptitech/traq-ui:latest
+          volumeMounts:
+            - mountPath: /app/override/config.js
+              name: config
+              subPath: config.js
+              readOnly: true
