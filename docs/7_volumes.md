@@ -25,7 +25,7 @@ metadata:
 
 spec:
   volumes:
-  	# 空のディレクトリーの、一時 Volume を構成
+    # 空のディレクトリーの、一時 Volume を構成
     - name: my-shared-vol
       emptyDir: {}
 
@@ -122,6 +122,7 @@ spec:
       # ホストの /data/mariadb を Volume として定義
       hostPath:
         path: /data/mariadb
+        type: DirectoryOrCreate
 
   containers:
     - name: mariadb
@@ -130,7 +131,7 @@ spec:
         - name: MARIADB_ROOT_PASSWORD
           value: password
       volumeMounts:
-      	# コンテナ内の /var/lib/mysql に Volume Mount
+        # コンテナ内の /var/lib/mysql に Volume Mount
         - name: data
           mountPath: /var/lib/mysql
 ```
