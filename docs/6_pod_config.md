@@ -106,7 +106,7 @@ spec:
               name: dotfile-secret # Secret の名前
               key: .secret-file # Secret 内の key 名
       envFrom:
-      	# ConfigMap の全ての key-value ペアより環境変数を一括で設定
+        # ConfigMap の全ての key-value ペアより環境変数を一括で設定
         - configMapRef:
             name: another-configmap
         # 同様に、Secret より環境変数を一括で設定
