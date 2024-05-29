@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb
+
+spec:
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: mariadb
+
+  containers:
+    - name: mariadb
+      image: mariadb:11
+      env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: password
+      volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql

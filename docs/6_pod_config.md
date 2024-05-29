@@ -67,11 +67,11 @@ metadata:
 
 spec:
   containers:
-  	- name: caddy
-  	  image: caddy:2
-  	  env:
-  	  	- name: TEST_ENV
-  	  	  value: "my-value"
+    - name: caddy
+      image: caddy:2
+      env:
+        - name: TEST_ENV
+          value: "my-value"
 ```
 
 上記の例では `caddy` コンテナに、`TEST_ENV` という環境変数を `my-value` という値で供給しています。
@@ -164,7 +164,7 @@ metadata:
 
 spec:
   volumes:
-    - name: my-cf-volume
+    - name: my-cf-volume # ConfigMap から、この Pod の Volume を定義
       configMap:
         name: my-html-files
   containers:
@@ -177,21 +177,21 @@ spec:
 
 [../examples/6_configmap_pod.yaml](../examples/6_configmap_pod.yaml)
 
-上のような ConfigMap と Pod 定義があったとき、Pod 定義の `.spec.volumes` と `.spec.containers[].volumeMounts` から適切に参照することで、key-value ペアからファイルを生成し Volume Mount を構成できます。
+Pod 定義の `.spec.volumes` と `.spec.containers[].volumeMounts` から ConfigMap や Secret を参照することで、key-value ペアからファイルを生成し Volume Mount を構成できます。
 
 上の場合、`/usr/share/caddy` ディレクトリがコンテナ内に Volume Mount され、ConfigMap の各 key-value に対応するファイルとその中身が生成されます。
-`/usr/share/caddy/index.html` の中身は、対応する value のものとなります。
+コンテナのプロセスが `/usr/share/caddy/index.html` にアクセスすると、対応する value（ここでは HTML ファイル）が読み取れます。
 
-実際に ConfigMap から Volume Mount を構成した Pod をクラスターに適用してみましょう。
+実際に、ConfigMap から Volume Mount を構成した Pod を作ってみましょう。
 次のコマンドを実行して、ConfigMap と Pod をクラスターに登録します。
 
 - `kubectl apply -f ./examples/6_configmap_pod.yaml`
 
-次のコマンドで Pod の 80 番ポートへ port-forward を行います。
+次のコマンドで、Pod の 80 番ポートへ port-forward を行います。
 
 - `kubectl port-forward pod/caddy 8000:80`
 
-手元のブラウザで http://localhost:8000/ を開き、ConfigMap の中身が配信されていることが確認できれば成功です。
+手元のブラウザで http://localhost:8000/ を開き、ConfigMap の中身がWebページとして配信されていることを確認できれば成功です。
 
 ![serving html from configmap](../images/6_configmap_pod.png)
 
@@ -202,6 +202,21 @@ ConfigMap や Secret は、Pod への環境変数と Volume Mount の構成**以
 例えば Secret では `type` を設定することができ、特定の `type` では ServiceAccount などの他リソースと連携する特殊な用法があります。
 
 具体的な色々な用法については、[Secrets のドキュメント](https://kubernetes.io/docs/concepts/configuration/secret/)を覗くと良いでしょう。
+
+## Secret の管理方法
+
+Secret は機微情報を扱うリソースのため、特定の人間やコンテナ以外には見せたくない情報が入っていることが多々あります。
+
+したがって、他のリソースとは異なる形で、定義の管理を行いたいことが多いです。
+
+場面によって最適な方法も大きく異なるため、ここでは詳しくは解説しませんが、有名な方法として次のものがあります。
+
+- [SOPS: Secret OPerationS](https://github.com/getsops/sops) : YAML 定義をそのまま暗号化してしまう方法
+- [External Secrets Operator](https://github.com/external-secrets/external-secrets) : 外部に値を保存し、この「Operator」がクラスターに Secret リソースを人間の代わりに書き込む方法
+
+> [!NOTE]
+> traP のクラスターでは、[ArgoCD](https://github.com/argoproj/argo-cd) + SOPS + [age](https://github.com/FiloSottile/age) で非対称暗号化を行い、GitOps で運用しています。
+> [暗号化された Secret 例](https://github.com/traPtitech/manifest/blob/03ce70240d5e309777a57ac8820a8adf22d07f6f/ns-system/secrets/ns.yaml)を覗くと面白いかもしれません。
 
 ## 次へ
 

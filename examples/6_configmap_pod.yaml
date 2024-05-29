@@ -19,7 +19,7 @@ metadata:
 
 spec:
   volumes:
-    - name: my-cf-volume
+    - name: my-cf-volume # ConfigMap から、この Pod の Volume を定義
       configMap:
         name: my-html-files
   containers:

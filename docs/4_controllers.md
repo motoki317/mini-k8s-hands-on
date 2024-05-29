@@ -4,16 +4,23 @@
 
 [./0_kubernetes_workings.md](./0_kubernetes_workings.md) でも説明しましたが、簡単に言えば Kubernetes は **KVS**（**Key Value Store**）と**コントローラー**から成ります。
 
-KVS の部分では、いくつかリソースの「種類」があり（例: Pod, Deployment, Service, ...）、名前に紐づくリソースの定義（yaml で書くことが多い）を管理しているだけです。
+KVS では、いくつかのリソースの「種類」（例: Pod, Deployment, Service, ...）と、名前に紐づくリソースの定義（yaml で書くことが多い）を管理します。
 
-コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはある「上位の」リソース（例: Deployment）を監視し、そこから導かれる「下位の」リソース（例: ReplicaSet）を KVS に登録または削除（管理）します。
-いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づき、最終的には Pod が定義されコンテナ達がデプロイされます。[^1]
+> [!NOTE]
+> この KVS の実装は、[MySQL](https://www.mysql.com/) や [SQLite](https://www.sqlite.org/) だったり、[etcd](https://etcd.io/) だったりしますが、普段気にすることはありません。
+
+コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはある「上位の」リソース（例: Deployment）を監視し、そこから導かれる「下位の」リソース（例: ReplicaSet）を KVS に登録または削除（つまり、管理）します。
+いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づき、最終的には Pod が定義され、コンテナ達がデプロイされます。[^1]
 
 [^1]: https://kubernetes.io/docs/concepts/workloads/controllers/
 
+> [!NOTE]
+> 各種コントローラーは Kubernetes の内部コンポーネントとして埋め込まれています。
+> また、自分でも独自の「Kubernetes コントローラー」を作ることができますが、それはもう少し難しいので後の話。
+
 ![argocd objects](../images/0_argocd_objects.png)
 
-↑ArgoCDの管理画面。「上位」と「下位」のリソースと、その対応関係が視覚的に理解できる。"deploy"はDeployment, "sts"はStatefulSet, "rs"はReplicaSetの略。
+ArgoCDの管理画面 - 「上位」と「下位」のリソースのイメージ（deploy: Deployment, rs: ReplicaSet）
 
 ### なぜコントローラーを使うか？
 
@@ -21,31 +28,36 @@ KVS の部分では、いくつかリソースの「種類」があり（例: Po
 
 例えば、大量のトラフィックを捌くため、たくさんの Pod をデプロイしたい時があります。
 前ページのような yaml をたくさんコピペして（場合によっては100個以上！）、`caddy-1`, `caddy-2` とそれぞれ Pod に名付け、管理するのは大変です。
-（複数 Pod に同じ名前を付けることはできません。KVS で管理する時にどの Pod を指すか分からなくなるため。）
+（複数 Pod に同じ名前を付けることはできません。KVS で管理するためです。）
 
-ここで Deployment リソースを使うことで、人間が管理するリソースは一つの Deployment だけとなります。
+ここで Deployment リソースを使うことで、たくさんの Pod を一気に管理できます。
 Deployment は複数の ReplicaSet リソースを管理し、ReplicaSet は複数の Pod リソースを管理します。
 
-また、イメージのバージョンを更新する際に、Deployment 等のリソースで細かくアップデート方法（一度に入れ替える Pod の割合等）を制御できます。
+また、Deployment などの「上位の」リソースでは、細かいアップデート方法（一度に入れ替える Pod の割合等）などを制御できます。
 これを上手く用いることで、ダウンタイムゼロのWebサイトの更新などができます。
+
+> [!NOTE]
+> Pod リソースを直接ユーザーが定義すると、ノードに障害が起こった場合、Pod の再配置はされません。
+> これでは障害耐性が低くなってしまいます。
+> そのため、通常は Pod を直接定義せず、Deployment 等の「上位の」リソースを扱います。
 
 ## Deployment とは
 
 Deployment リソースは、**ステートレス**な Pod を管理するのに最もよく使われるリソースです。
-簡単に Pod を複製できたり、バージョン更新やその方法を細かく管理できます。
+たくさんの Pod を管理したり、バージョン更新方法を細かく管理できます。
 
-**ステートレス**とは、他の同一 Pod（コンテナ）と「入れ替えが効く」ような Pod（コンテナ）のことです。
+**ステートレス**な Pod とは、他の同一 Pod（コンテナ）と「入れ替えが効く」ような Pod（コンテナ）のことです。
 言い換えれば、何個コンテナが複製されても問題無いようなアプリケーションのことです。
-例えば、大量のHTTPリクエストを処理する、シンプルなAPIサーバーやWebサーバーなどです。
+例えば、HTTP リクエストを処理するシンプルなAPIサーバーやWebサーバーなどが該当します。
 
-反対に、**ステートフル**とは、アプリケーションに状態（ステート）があり、「入れ替えが効かない」Pod（コンテナ）のことです。
+反対に、**ステートフル**な Pod とは、アプリケーションに状態（ステート）があり、「入れ替えが効かない」Pod（コンテナ）のことです。
 言い換えると、同じ役割のコンテナが複数個存在すると、上手く動かないアプリケーションのことです。
 例えば、MySQL などのデータベースサーバーは同じファイルを操作するので、同じ役割のコンテナ（プロセス）が複数個いると上手く動きません。
 
-## Deployment を使う
+### Deployment の定義を見る
 
 前ページで使った [caddy](https://hub.docker.com/_/caddy) は、ステートレスな Web サーバーとして使えます。
-大量のHTTPリクエストを捌くために複数のWebサーバー（Pod）を建てたいと仮定し、これを実現する最小構成の Deployment を書きます。
+大量の HTTP リクエストを捌くために複数のWebサーバー（Pod）を建てたいと仮定し、これを実現する最小構成の Deployment を書きます。
 
 ```yaml
 apiVersion: apps/v1
@@ -80,14 +92,17 @@ Pod 単体よりは少し定義が複雑になっていますね。
 それぞれのフィールドを解説します。
 
 - `.spec.replicas` : Pod のレプリカ数を定義します。3 と書けば同一の Pod が 3 個デプロイされるし、100 と書けば 100 個デプロイされます。
-- `.spec.selector` : 管理対象とする Pod の「セレクター」を定義します。Deployment Controller はこのセレクターを用いてクラスター内の Pod を列挙し、それらを管理対象とします。その数が `.spec.replicas` 以上であればいくつかを削除、以下であれば新しく Pod を作成します。
+- `.spec.selector` : Deployment Controller は、この「セレクター」定義から管理対象 Pod を計算します。その Pod 数が `.spec.replicas` 以上であれば Pod を削除、以下であれば新しく Pod を作成します。
 - `.spec.template` : Deployment Controller が Pod を新しく作成する際に、テンプレートとする Pod 定義です。前ページの Pod 定義と大部分は同じです。
-- `.spec.template.metadata` : `.spec.selector` で選択可能な Pod の「ラベル」を定義します。ここでは `app: caddy` という同一のラベルを定義しています。Deployment Controller は `.spec.selector` で Pod を列挙・管理しているため、定義が一致しないとずっと「Pod が足りない」と判断され、際限なく Pod が作成され続けてしまいます。
+- `.spec.template.metadata.labels` : ここで `.spec.selector` によって管理対象として選ばれるような「ラベル」を書きます。
 
-正確には Deployment Controller が直接 Pod を管理するのではなく、間に ReplicaSet リソースとその ReplicaSet Controller が挟まりますが[^2]、ここでは説明を簡単にするため、詳細は省略します。
-「Deployment リソースを定義すると、その数だけ Pod が作られる」ことが理解できれば大丈夫です。
+> [!NOTE]
+> `.spec.selector` で `.spec.template` の Pod を選択できないと？
+>
+> Deployment Controller は「Template に従って Pod を作成したが、管理対象に現れない」という挙動に陥り、際限なく Pod を作成するループに陥ってしまいます。
+> `.spec.selector` と `.spec.template` のラベルは一致させることが重要です。
 
-[^2]: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+### Deployment を使う
 
 さて、Deployment を「デプロイ」していきましょう！
 （Do you see the joke?）
@@ -127,6 +142,13 @@ caddy-766687f85d-mmkl6   1/1     Running   0          6m7s
 同一名の Pod は作れないため、Deployment Controller は末尾にランダムな suffix を付けて Pod を作成します。
 この管理の仕方からも、各 Pod の**ステートレス**性（入れ替えが効く）を前提にしていることが伺えます。
 
+> [!NOTE]
+> 正確には、Deployment Controller が直接 Pod を管理するのではなく、その間に ReplicaSet リソースとその ReplicaSet Controller が挟まります[^2]。
+> ただしここでは説明を簡単にするため、詳細は省略します。
+> 「Deployment リソースを定義すると、`.spec.replicas` の指定数だけ Pod が作られる」ことが理解できれば大丈夫です。
+
+[^2]: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+
 ### アプリケーションにアクセスする
 
 再度、Webサーバーが正常に動いているかを確認します。
@@ -135,7 +157,7 @@ caddy-766687f85d-mmkl6   1/1     Running   0          6m7s
 
 - `kubectl port-forward deployment/caddy 8000:80`
 
-「Pod **群**へ port-forward する」と、各HTTPリクエストが 3 つの Pod のうちいずれか 1 つに渡るという挙動になります。
+「Pod **群**へ port-forward する」と、HTTP リクエストは 3 つの Pod のうちいずれか 1 つに渡るという挙動になります。
 最も基本的なロードバランシングです。
 （正確な挙動は、次ページの Service, Ingress の項で説明します。）
 
@@ -145,9 +167,10 @@ https://localhost:8000/ へアクセスし、再度次の画面が見えたら�
 
 ### アプリケーションを更新する
 
-次に、アプリケーションのバージョンを更新します。
+次に、アップデート方法の制御という Deployment のもう一つの利点を確認してみます。
 
-Deployment リソースを書き換え、再度 apply することで、更新が完了します。
+コンテナイメージのバージョンを更新してみましょう。
+更新するには、Deployment リソースの yaml 定義を書き換え、再度 `kubectl apply` を行います。
 
 `./examples/4_deployment.yaml` ファイル中の、`.spec.template.spec.containers[0].image` フィールドを書き換えて、イメージのバージョンを更新してみましょう。
 
@@ -160,7 +183,7 @@ Deployment リソースを書き換え、再度 apply することで、更新�
 # 前略
       containers:
         - name: caddy
-          image: caddy:2.7 # ここを更新して、イメージを更新！
+          image: caddy:2.7 # ここを変更して、イメージを更新！
 ```
 
 バージョン更新の様子が分かるように、別ターミナルで次のコマンドを打って、Pod の状態を監視します。
@@ -173,14 +196,14 @@ Deployment リソースを書き換え、再度 apply することで、更新�
 - `kubectl apply -f ./examples/4_deployment.yaml`
 
 次のように `configured` と出たら更新された証拠です。
-`unchanged` と出たら、YAML をしっかり書き換えて保存したかを再度確認しましょう。
+万が一 `unchanged` と出たら、YAML をしっかり書き換えて保存したかを再度確認しましょう。
 
 ```plaintext
 $ kubectl apply -f ./examples/4_deployment.yaml 
 deployment.apps/caddy configured
 ```
 
-更新したら、`kubectl get pods` の様子をよく見てみましょう。
+更新したら、すぐに `kubectl get pods` の様子を確認します。
 
 ```plaintext
 NAME                     READY   STATUS              RESTARTS   AGE
@@ -195,7 +218,8 @@ caddy-7b56f884f5-29gtw   0/1     ContainerCreating   0          0s
 見落としてしまったら、`caddy:2.6` と `caddy:2.7` を行き来させて、何度も確認してみましょう。
 
 Deployment Controller はデフォルトで、アップデート中も `.spec.replicas` の 75% 以上の Pod が常に `Running` であることを保証（しようと）します。
-75% という細かい数値は Deployment リソースの定義で調整可能ですが、このアップデート機構を上手く用いることで、ゼロダウンタイムでのWebサイト更新ができます。
+ちなみに 75% という数値や、その他細かい挙動は Deployment リソースの定義で調整可能です。
+このアップデート機構を上手く用いることで、ゼロダウンタイムでのWebサイト更新ができます。
 
 ### お掃除
 
@@ -211,11 +235,11 @@ Deployment と Pod が消えることを確認します。
 ## StatefulSet を使う
 
 Deployment ではステートレスな Pod を管理しましたが、
-**ステートフル**な（入れ替えが効かない、同じ役割のコンテナが存在するとまずい）Pod は **StatefulSet** を用いて管理するのが一般的です。
+**ステートフル**な Pod は **StatefulSet** を用いて管理するのが一般的です。
 
 StatefulSet リソースでは、1個以上のステートフルな Pod と、その更新順序などを細かく管理できます。
 
-さて、ここでは [redis](https://hub.docker.com/_/redis) をステートフルなアプリケーションの例として使います。
+ここでは [redis](https://hub.docker.com/_/redis) をステートフルなアプリケーションの例として使います。
 （Redis は内部で状態を持っており、特に永続化する場合は、同じ役割のコンテナが同時に存在すると困ります。）
 
 1 つの Redis の Pod を管理する、最小の StatefulSet リソースを書いていきます。
@@ -308,20 +332,25 @@ redis-0   1/1     Running   0          5m52s
 ```
 
 Pod の名前は、Deployment のランダムな suffix の管理と違い、`{StatefulSetの名前}-{番号}` といった予測可能な名前になっています。
-この管理の仕方からも、同じ役割の Pod が同時に2つ存在できないこと（同じ名前の Pod は存在できないことを思い出してください）が伺えます。
+この管理の仕方からも、同じ役割の Pod が同時に2つ存在できないことが伺えます。
+（同じ名前の Pod は存在できないことを思い出してください。）
 実際に、StatefulSet が Pod を更新する時は、今ある Pod（例: `redis-0`）を削除してから、新しい Pod（例: `redis-0`）を作成します。
 
 ### アプリケーションを更新する
 
 実際に、同じ役割の Pod が同時に存在しない（この例では、redis の Pod が同時に2個以上存在しない）ことを確認しましょう。
 
-更新の様子が分かるように、別ターミナルで次のコマンドを打って、Pod の状態を監視します。
+更新の様子が分かるように、次のコマンドを打って Pod の状態を監視します。
 
 - `watch -n 0.5 kubectl get pods`
 
 別のターミナルを開き、次のコマンドで StatefulSet の更新を模した、再起動を行います。
 
 - `kubectl rollout restart statefulset/redis`
+
+> [!NOTE]
+> もちろん Deployment の時と同じように、イメージのバージョンを更新して、再度 `kubectl apply` する方法でも可能です。
+> ここでは簡単に再起動だけを試すために、`kubectl rollout` コマンドを使います。
 
 一瞬ですが、Pod の状態がまず `Terminating` になってから、次の Pod が`ContainerCreating` になり、最後に `Running` になったことが分かったでしょうか。
 同時に `redis-0` のような Pod が2個存在する瞬間が存在しないことを確認しましょう。

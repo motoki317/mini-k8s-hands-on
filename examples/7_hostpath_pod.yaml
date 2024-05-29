@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb
+
+spec:
+  # kubernetes.io/hostname ラベルが k3d-hands-on-agent-0 であるノードにのみ、Pod をデプロイする
+  nodeSelector:
+    kubernetes.io/hostname: k3d-hands-on-agent-0
+
+  volumes:
+    - name: data
+      # ホストの /data/mariadb を Volume として定義
+      hostPath:
+        path: /data/mariadb
+        type: DirectoryOrCreate
+
+  containers:
+    - name: mariadb
+      image: mariadb:11
+      env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: password
+      volumeMounts:
+        # コンテナ内の /var/lib/mysql に Volume Mount
+        - name: data
+          mountPath: /var/lib/mysql
