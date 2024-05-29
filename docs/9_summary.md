@@ -58,7 +58,7 @@ https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 Kubernetes クラスターでデプロイされているWebサイトやアプリケーションへのトラフィック量は、ユーザーの上限、時間帯などによって大きく上下します。
 したがって、Deployment などの replica 数や、それをサポートするノード数も動的に調整できると、クラウドではコストを最適化できて嬉しいです。
 
-負荷の量によって動的に Deployment などの replica 数を上限させるリソースが、Horizontal Pod Autoscaler です。
+負荷の量によって動的に Deployment などの replica 数を上限させるオブジェクトが、Horizontal Pod Autoscaler です。
 
 https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
 
@@ -103,7 +103,7 @@ Docker Engine を使ってイメージを build、push したときも（だい�
 
 ## クラウドとオンプレミスクラスターの違い
 
-ハンズオンの各所でも紹介しましたが、Kubernetes にはそれ自身で使える要素と、「プロバイダー依存」の要素（リソース）があります。
+ハンズオンの各所でも紹介しましたが、Kubernetes にはそれ自身で使える要素と、「プロバイダー依存」の要素があります。
 
 例:
 
@@ -123,18 +123,18 @@ Kubernetes の利便性や耐障害性、高可用性といった性質は、も
 
 裏の全ての仕組みを理解する必要はありませんが、どこまでがそのクラウドの機能なのかに目を向けてみると理解が深まり、より適切な利用法に繋がるでしょう。
 
-## リソース管理と GitOps
+## オブジェクト管理と GitOps
 
 このハンズオンでは終始 kubectl CLI を用いて、クラスターの状態を操作しました。
 
 小規模かつ、あまり変更が無い場合はこれでも十分かもしれません。
-しかしより大規模になったり、リソースに変更が頻繁に起きる場合は、手動で kubectl CLI を叩くことによるヒューマンエラーを削減したいです。
+しかしより大規模になったり、オブジェクトに変更が頻繁に起きる場合は、手動で kubectl CLI を叩くことによるヒューマンエラーを削減したいです。
 
 CI/CD を用いて、ある git リポジトリのイベントをトリガーとして `kubectl apply` などの自動化を行っても良いですが、より良い"ドリフト"が無いことを保証する方法があります。
 
-まず Kubernetes は、その reconciliation loop によって「API Server に登録されているリソース <-> 実際のコンテナ等」に乖離が無いことを機械的に保証するシステムです。
+まず Kubernetes は、その reconciliation loop によって「API Server に登録されているオブジェクト <-> 実際のコンテナ等」に乖離が無いことを機械的に保証するシステムです。
 
-**GitOps**は、reconciliation loop によって「Git のリソース yaml 定義 <-> Kubernetes API Server に登録されているリソース」に乖離が無いことを保証するシステムです。
+**GitOps**は、reconciliation loop によって「Git のオブジェクト yaml 定義 <-> Kubernetes API Server に登録されているオブジェクト」に乖離が無いことを保証するシステムです。
 
 GitOps を用いることにより、開発者は git リポジトリに対して変更を行うだけとなり、複数人のコラボレーションやバージョン管理、問題発生時の切り戻しがさらに容易になります。
 
@@ -143,7 +143,7 @@ GitOps を用いることにより、開発者は git リポジトリに対し�
 - [ArgoCD](https://github.com/argoproj/argo-cd)
 - [Flux](https://github.com/fluxcd)
 
-特に ArgoCD は分かりやすい UI がデフォルトで存在し、リソースの依存関係などを視覚的に理解できるため、個人的にもお気に入りです。
+特に ArgoCD は分かりやすい UI がデフォルトで存在し、オブジェクトの依存関係などを視覚的に理解できるため、個人的にもお気に入りです。
 
 ## CSI (Container Storage Interface)
 
@@ -177,11 +177,11 @@ https://kubernetes.io/blog/
 
 ### Gateway API
 
-Ingress に取って代わる、より高機能な L4 / L7 ルーティングリソースの一覧です。
+Ingress に取って代わる、より高機能な L4 / L7 ルーティングオブジェクトの一覧です。
 
 https://gateway-api.sigs.k8s.io/
 
-Ingress には足りなかった開発者のロールを意識したリソース設計を取り入れたり、より複雑なルーティングを表現できるようになっています。
+Ingress には足りなかった開発者のロールを意識したオブジェクト設計を取り入れたり、より複雑なルーティングを表現できるようになっています。
 
 ### Dynamic Resource Allocation
 

@@ -268,12 +268,12 @@ Pod 再作成間でデータの永続化ができました。
 
 ### PersistentVolume (PV) / PersistentVolumeClaim (PVC)
 
-PersistentVolume[^2] は、Volume をより抽象化したリソースです。
+PersistentVolume[^2] は、Volume をより抽象化したオブジェクトです。
 
 [^2]: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 
-PersistentVolume（以下、PV）リソースは、ディスクなどの Volume 資源を表します。
-PersistentVolumeClaim（以下、PVC）リソースを使って、PV（の一部）を Volume として確保できます。
+PersistentVolume（以下、PV）オブジェクトは、ディスクなどの Volume 資源を表します。
+PersistentVolumeClaim（以下、PVC）オブジェクトを使って、PV（の一部）を Volume として確保できます。
 PVC によって確保された Volume を、Pod へ Volume Mount できます。
 
 実際の記述例を見てみましょう。
@@ -325,8 +325,8 @@ PVC の定義を少し解説します。
 
 StorageClass という単語が出てきました。
 
-PV / PVC も、実は「プロバイダー依存」のリソースです。
-StorageClass リソースは、特定の「プロバイダー実装」の PV / PVC を表します。
+PV / PVC も、実は「プロバイダー依存」のオブジェクトです。
+StorageClass オブジェクトは、特定の「プロバイダー実装」の PV / PVC を表します。
 （Ingress と IngressClass を思い出すと、似た概念であることがわかります。）
 
 先ほどは hostPath で Worker node のパスを直接 Volume Mount しました。
@@ -337,7 +337,7 @@ StorageClass リソースは、特定の「プロバイダー実装」の PV / P
 このブロックボリュームである PV を、我々が PVC 経由で Pod から Volume Mount して使うことで、StorageClass 実装は Pod が配置される Worker node にブロックボリュームを動的にアタッチします。
 
 したがってノードに障害が起きたとしても、多くのクラウドではブロックボリュームは別のリソースとして確保されているため、ボリュームにまで影響は及びません。
-別ノードにブロックボリュームを再アタッチし、Pod をそのノードにデプロイし直すことができます。
+別ノードにブロックボリュームを再アタッチし、Pod をそのノードにデプロイできます。
 
 また、PV を手動で定義することもありますが、通常は StorageClass 実装を通じて、PVC から動的に PV が作られます[^3]。
 
@@ -345,7 +345,7 @@ StorageClass リソースは、特定の「プロバイダー実装」の PV / P
 
 #### クラウド以外での PV / PVC
 
-PV / PVC はプロバイダー依存のリソースであり、その安定性・耐障害性はクラウドの StorageClass 実装に依るところが大きいです。
+PV / PVC はプロバイダー依存のオブジェクトであり、その安定性・耐障害性はクラウドの StorageClass 実装に依るところが大きいです。
 
 したがって、オンプレミスの Kubernetes クラスターや、今回のハンズオンのように手元で動かしているクラスターでは、こうした耐障害性の高い StorageClass 実装をすぐには利用できません。
 自身で StorageClass 実装を提供する必要があります。
@@ -375,7 +375,7 @@ local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsu
 
 概念的には hostPath とほとんど同じですが、この `local-path` StorageClass を使ってみましょう。
 
-まずは PVC リソースを作成します。
+まずは PVC オブジェクトを作成します。
 
 ```yaml
 apiVersion: v1
@@ -399,7 +399,7 @@ spec:
 無事作成されたかを確認します。
 
 - `kubectl get pvc`
-    - `persistentvolumeclaim` の略として、`pvc` と書けます。他にも `service` の略は `svc` など、リソースには略称が存在することがあります。
+    - `persistentvolumeclaim` の略として、`pvc` と書けます。他にも `service` の略は `svc` など、オブジェクトには略称が存在することがあります。
 
 ```plaintext
 $ kubectl get pvc
@@ -409,7 +409,7 @@ mariadb   Pending                                      local-path     107s
 
 `STATUS: Pending` となっていますが、これで正常です。
 なぜ `Pending` となっているのでしょうか？
-リソースの詳細（イベント）を確認してみましょう。
+オブジェクトの詳細（イベント）を確認してみましょう。
 
 - `kubectl describe pvc mariadb`
 
@@ -481,17 +481,17 @@ NAME      STATUS   VOLUME                                     CAPACITY   ACCESS 
 mariadb   Bound    pvc-6a18417b-eddc-499a-9450-ead0be9ed0c1   10Gi       RWO            local-path     6m50s
 ```
 
-先ほどとは異なり、PVC リソースの `STATUS` が `Bound` となりました。
+先ほどとは異なり、PVC オブジェクトの `STATUS` が `Bound` となりました。
 無事 PVC を使用できたようです。
 
 > [!NOTE]
-> ボーナス: それぞれのリソースのイベントを確認し、PVC がプロビジョニングされる様子を確認しましょう。
+> ボーナス: それぞれのオブジェクトのイベントを確認し、PVC がプロビジョニングされる様子を確認しましょう。
 >
 > - `kubectl describe pvc mariadb`
 > - `kubectl describe pod mariadb`
 
 最後に、Pod へ接続してデータ操作を行い、Pod を削除・再作成し、データが永続化されているかを確かめましょう。
-ここでは PVC リソースに Volume データの実体が紐づいているため、**PVC リソースを消すと Volume データも消えます**ので、注意してください。
+ここでは PVC オブジェクトに Volume データの実体が紐づいているため、**PVC オブジェクトを消すと Volume データも消えます**ので、注意してください。
 
 細かい手順は hostPath の時と同じなので省きますが、次の通りです。
 

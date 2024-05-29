@@ -9,7 +9,7 @@
 しかし、これ以外の方法で、クラスター内部や外部から、Webページやサービスにアクセスするにはどうしたらよいでしょうか？
 複数 Pod をデプロイしている場合は、大量のリクエストを捌くため、各 Pod になるべく均等にリクエストが渡るようにもしたいです。
 
-これを解決するリソースが Service と Ingress です。
+これを解決するオブジェクトが Service と Ingress です。
 
 > [!NOTE]
 > 最近では Ingress に取って代わるものに [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/) というものが開発されていますが、ここでは扱いません。
@@ -60,7 +60,7 @@ Service はセレクターによって宛先 Pod 一覧を取得しますが、�
 つまり、Service のセレクターに一致する Pod を Deployment などで変化させることで、Service には手を加えずに、Service の宛先 Pod 一覧を動的に変更できるということです。
 
 > [!NOTE]
-> ボーナス知見: この「Service の宛先 Pod 一覧」は EndpointSlice[^2] というリソースによって管理されています。
+> ボーナス知見: この「Service の宛先 Pod 一覧」は EndpointSlice[^2] というオブジェクトによって管理されています。
 > この Slice という単語は、Kubernetes が Go 言語で書かれており、Go 言語でリストを表すのに使う「スライス」から来ています。
 
 [^2]: https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/
@@ -134,7 +134,7 @@ Events:            <none>
 これを先程の Pod の IP と照らし合わせると、確かに Service は Pod の IP が選択できていると分かります。
 
 > [!NOTE]
-> ボーナス: 次のコマンドを実行して、Service が裏で管理しているリソースである EndpointSlice を覗いてみましょう。
+> ボーナス: 次のコマンドを実行して、Service が裏で管理しているオブジェクトである EndpointSlice を覗いてみましょう。
 >
 > - `kubectl get endpointslices`
 > - `kubectl describe endpointslice caddy-vdw57`
@@ -149,7 +149,7 @@ Service へ通信する方法はいくつかあります。
 1. Service の ClusterIP を使う（クラスター内のみ）
 
 各 Pod や Service には作成時にランダムで IP が割り振られます。
-しかし Pod はよく Deployment などによって再作成され入れ替わるのに対し、Service は一度定義したら基本的に変更しないリソースです。
+しかし Pod はよく Deployment などによって再作成され入れ替わるのに対し、Service は一度定義したら基本的に変更しないオブジェクトです。
 
 これを考慮すると、特定のラベル（例: `app: caddy`）の付いた Pod に通信を行いたい場合は、Service の IP（例: `10.43.128.113`）へ通信を行うと、Pod の再作成といった裏側の変化を気にせずに通信を行うことができます。
 
@@ -297,13 +297,13 @@ Ingress を用いることで、同一 TCP コネクション上で HTTP リク�
 > 「コントローラー」という単語が再び出てきました。
 > Ingress Controller もコントローラーの一種です。
 >
-> - 読み取るもの: Ingress リソース
+> - 読み取るもの: Ingress オブジェクト
 > - 管理するもの: クラウドの経路設定や、内部のルーティング制御など
 >
 > 比較すると、Deployment Controller は次を管理します。
 >
-> - 読み取るもの: Deployment リソース
-> - 管理するもの: ReplicaSet リソース
+> - 読み取るもの: Deployment オブジェクト
+> - 管理するもの: ReplicaSet オブジェクト
 
 クラウドが提供する Kubernetes の distribution（例: GKE, EKS, AKS）では、Ingress Controller は何もしなくても提供されていることが多く、特に考えることはありません。
 しかし k0s, k3s などの自前で管理する distribution については、Ingress Controller も自身の管理の範囲にあります。
@@ -324,7 +324,7 @@ NAME      CONTROLLER                      PARAMETERS   AGE
 traefik   traefik.io/ingress-controller   <none>       44m
 ```
 
-該当リソースに関するより詳しい情報は、次のコマンドで得られます。
+該当オブジェクトに関するより詳しい情報は、次のコマンドで得られます。
 
 - `kubectl get ingressclass traefik -o yaml`
 
@@ -352,7 +352,7 @@ spec:
 ```
 
 `.metadata.annotations` に `ingressclass.kubernetes.io/is-default-class: "true"` が付いていることが確認できます。
-これは、後述の Ingress リソースで `.spec.ingressClassName` を指定しなかった場合、この `traefik` IngressClass、つまりこの Ingress 実装が、デフォルトで対応することを示しています。
+これは、後述の Ingress オブジェクトで `.spec.ingressClassName` を指定しなかった場合、この `traefik` IngressClass、つまりこの Ingress 実装が、デフォルトで対応することを示しています。
 
 他には有名な OSS の Ingress Controller として、
 
@@ -398,7 +398,7 @@ spec:
 
 少しネストが深いですが、気合で雰囲気を掴み取ってください。
 
-- `.spec.ingressClassName` : この Ingress リソースの「実装」を担当する IngressClass を指定できる。指定しなかった場合、デフォルト IngresClass（もしあれば）が「実装」を担当する。
+- `.spec.ingressClassName` : この Ingress オブジェクトの「実装」を担当する IngressClass を指定できる。指定しなかった場合、デフォルト IngresClass（もしあれば）が「実装」を担当する。
 - `.spec.rules[].host` : Virtual hosting[^5] を行う場合、指定する。
 - `.spec.rules[].http.paths` : この Ingress にマッチする HTTP リクエストの条件を指定する。
 - `.spec.rules[].http.paths[].backend` : 上で指定した条件にマッチした HTTP リクエストを、どの Service（によって指定される Pod）に送るかを指定する。
@@ -439,13 +439,13 @@ caddy   traefik   caddy.local.trapti.tech   172.16.7.2,172.16.7.3,172.16.7.4,172
 > traefik の Pod は `kube-system` namespace にデプロイされています。
 > これは `kubectl get pods -n kube-system` で確認できます。
 >
-> Namespace は、簡単に言えばリソースの名前空間を分ける概念です。Namespace が違えば、同種かつ同名のリソースをクラスターに登録できます。
+> Namespace は、簡単に言えばオブジェクトの名前空間を分ける概念です。Namespace が違えば、同種かつ同名のオブジェクトをクラスターに登録できます。
 >
 > 再びですが、難しければこの仕組みは理解しなくてもOKです。
 
 ### お掃除
 
-ここまでで使用したリソースを削除しておきます。
+ここまでで使用したオブジェクトを削除しておきます。
 
 - `kubectl delete deployment caddy`
 - `kubectl delete service caddy`

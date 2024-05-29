@@ -4,15 +4,15 @@
 
 ## ConfigMap / Secret
 
-ConfigMap と Secret は、key-value 形式で情報を保存できるリソースです。
+ConfigMap と Secret は、key-value 形式で情報を保存できるオブジェクトです。
 
-ConfigMap は非機微情報、Secret はその名の通り機微情報を扱うためのリソースです。
+ConfigMap は非機微情報、Secret はその名の通り機微情報を扱うためのオブジェクトです。
 
 ConfigMap や Secret は、
 
 - コンテナの環境変数定義
 - コンテナの Volume Mount の構成
-- その他のリソースの設定の記述
+- その他のオブジェクトの設定の記述
 
 に使えます。
 
@@ -77,7 +77,7 @@ spec:
 上記の例では `caddy` コンテナに、`TEST_ENV` という環境変数を `my-value` という値で供給しています。
 
 > [!NOTE]
-> Pod を直接定義することは実用上あまり無いですが、シンプルさのために Pod リソースを直接書いて説明しています。
+> Pod を直接定義することは実用上あまり無いですが、シンプルさのために Pod オブジェクトを直接書いて説明しています。
 > Deployment や StatefulSet でも、Pod template 内で同様の記法が使えます。
 
 ### ConfigMap / Secret からの環境変数
@@ -199,20 +199,20 @@ Pod 定義の `.spec.volumes` と `.spec.containers[].volumeMounts` から Confi
 
 ConfigMap や Secret は、Pod への環境変数と Volume Mount の構成**以外**にも使えます。
 
-例えば Secret では `type` を設定することができ、特定の `type` では ServiceAccount などの他リソースと連携する特殊な用法があります。
+例えば Secret では `type` を設定することができ、特定の `type` では ServiceAccount などの他オブジェクトと連携する特殊な用法があります。
 
 具体的な色々な用法については、[Secrets のドキュメント](https://kubernetes.io/docs/concepts/configuration/secret/)を覗くと良いでしょう。
 
 ## Secret の管理方法
 
-Secret は機微情報を扱うリソースのため、特定の人間やコンテナ以外には見せたくない情報が入っていることが多々あります。
+Secret は機微情報を扱うオブジェクトのため、特定の人間やコンテナ以外には見せたくない情報が入っていることが多々あります。
 
-したがって、他のリソースとは異なる形で、定義の管理を行いたいことが多いです。
+したがって、他のオブジェクトとは異なる形で、定義の管理を行いたいことが多いです。
 
 場面によって最適な方法も大きく異なるため、ここでは詳しくは解説しませんが、有名な方法として次のものがあります。
 
 - [SOPS: Secret OPerationS](https://github.com/getsops/sops) : YAML 定義をそのまま暗号化してしまう方法
-- [External Secrets Operator](https://github.com/external-secrets/external-secrets) : 外部に値を保存し、この「Operator」がクラスターに Secret リソースを人間の代わりに書き込む方法
+- [External Secrets Operator](https://github.com/external-secrets/external-secrets) : 外部に値を保存し、この「Operator」がクラスターに Secret オブジェクトを人間の代わりに書き込む方法
 
 > [!NOTE]
 > traP のクラスターでは、[ArgoCD](https://github.com/argoproj/argo-cd) + SOPS + [age](https://github.com/FiloSottile/age) で非対称暗号化を行い、GitOps で運用しています。

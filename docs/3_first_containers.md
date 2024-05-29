@@ -2,7 +2,7 @@
 
 ## Pod とは
 
-Kubernetes でコンテナをデプロイする一番原始的な方法は、Pod というリソースを定義することです。[^1]
+Kubernetes でコンテナをデプロイする一番原始的な方法は、Pod というオブジェクトを定義することです。[^1]
 
 [^1]: https://kubernetes.io/docs/concepts/workloads/pods/
 

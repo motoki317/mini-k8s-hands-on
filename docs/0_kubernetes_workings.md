@@ -16,7 +16,7 @@ Dockerなどをそのまま使うのに比べて、大きく2つのメリット�
 ## 簡単な仕組み
 
 誤解を恐れずにいうと、k8sは単なる **KVS** (**key value store**) と**コントローラ**からなります。
-以下のような**リソースオブジェクト**をyamlで宣言し、REST APIを通じてKVS（下画像の Kubernetes Objects）にぶちこむことでインフラの状態を「**宣言的に**」管理します。
+以下のような**オブジェクト**をyamlで宣言し、REST APIを通じてKVS（下画像の Kubernetes Objects）にぶちこむことでインフラの状態を「**宣言的に**」管理します。
 このyamlの宣言は **manifest** とも呼ばれます。
 
 ```yaml
@@ -34,8 +34,8 @@ spec:
 
 「宣言的に」とは、「最終的な状態だけを定義しておき、そこに至るまでの具体的な操作は記述しない」ということです。
 
-リソース更新等のイベント発生時や定時実行をトリガーとし、各コントローラが現在の状態と理想状態の差異を計算します。
-この差異から、具体的なインフラの操作（下画像の System Resources）や、サブリソース（下画像の Kubernetes Objects）の管理を行います。
+オブジェクト更新等のイベント発生時や定時実行をトリガーとし、各コントローラが現在の状態と理想状態の差異を計算します。
+この差異から、具体的なインフラの操作（下画像の System Resources）や、別オブジェクト（下画像の Kubernetes Objects）の管理を行います。
 
 この差異の計算と操作のループのことを、"**reconciliation loop**"と呼びます。
 シンプルですが、この reconciliation loop が非常に堅牢なことが実証されており、デプロイを安定して自動化できる仕組みとなっています。
@@ -44,7 +44,7 @@ spec:
 
 画像元: https://iximiuz.com/en/series/writing-kubernetes-controllers-operators/
 
-## 基本リソース
+## 基本オブジェクト
 
 すごく簡潔に説明すると、こんな感じ。
 
@@ -62,16 +62,16 @@ spec:
 
 ↑ArgoCDの管理画面①。type: LoadBalancerであるServiceが、あるIPに来たトラフィックをPodに渡している様子を視覚的に理解できる。
 
-## リソースの階層構造
+## オブジェクトの階層構造
 
-普通は直接Podをyamlで定義せず、DeploymentやStatefulSetなど、「上位の」リソースを人間が扱います。
-Deployment Controllerなどの各コントローラが、Deploymentなどの「上位の」リソースを監視し、ReplicaSet, Podなどの「下位の」リソースを管理します。
+普通は直接Podをyamlで定義せず、DeploymentやStatefulSetなど、「上位の」オブジェクトを人間が扱います。
+Deployment Controllerなどの各コントローラが、Deploymentなどの「上位の」オブジェクトを監視し、ReplicaSet, Podなどの「下位の」オブジェクトを管理します。
 
 Podが単にコンテナ1つを管理するのに対して、DeploymentやStatefulSetはそのレプリカ数、ノードが壊れた場合のPodの再起動・再設置、バージョン管理、起動の順番の管理などを行う、といった具合です。
 
 ![argocd objects](../images/0_argocd_objects.png)
 
-↑ArgoCDの管理画面②。「上位」と「下位」のリソースと、その対応関係が視覚的に理解できる。"deploy"はDeployment, "sts"はStatefulSet, "rs"はReplicaSetの略。
+↑ArgoCDの管理画面②。「上位」と「下位」のオブジェクトと、その対応関係が視覚的に理解できる。"deploy"はDeployment, "sts"はStatefulSet, "rs"はReplicaSetの略。
 
 ## 実際の運用
 

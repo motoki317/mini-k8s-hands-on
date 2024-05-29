@@ -4,7 +4,7 @@
 
 [./0_kubernetes_workings.md](./0_kubernetes_workings.md) でも説明しましたが、簡単に言えば Kubernetes は **KVS**（**Key Value Store**）と**コントローラー**から成ります。
 
-KVS では、いくつかのリソースの「種類」（例: Pod, Deployment, Service, ...）と、名前に紐づくリソースの定義（yaml で書くことが多い）を管理します。
+KVS では、オブジェクトの種類（例: Pod, Deployment, Service, ...）と名前（例: `caddy`）を key とし、オブジェクトの定義（yaml で表現することが多い）を value として管理します。
 
 この KVS を、Kubernetes では「**API Server**」を通じて操作します。
 API Server は、単なる RESTful な HTTP API サーバーです。
@@ -16,7 +16,7 @@ API Server は、単なる RESTful な HTTP API サーバーです。
 
 コントローラーとは、クラスターの状態を常に監視し、理想状態へ近づけるロジックのことです[^1]。
 
-コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはあるリソース（例: Deployment）や状態を監視し、そこから導かれる別のリソース（例: ReplicaSet）を管理したり、必要な場合はクラスター外部の状態を管理します。
+コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはあるオブジェクト（例: Deployment）や状態を監視し、そこから導かれる別のオブジェクト（例: ReplicaSet）を管理したり、必要な場合はクラスター外部の状態を管理します。
 
 いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づきます。
 最終的には Pod が定義され、コンテナ達がデプロイされます。
@@ -29,31 +29,31 @@ API Server は、単なる RESTful な HTTP API サーバーです。
 
 ![argocd objects](../images/0_argocd_objects.png)
 
-ArgoCDの管理画面 - 「上位」と「下位」のリソースのイメージ（deploy: Deployment, rs: ReplicaSet）
+ArgoCDの管理画面 - 「上位」と「下位」のオブジェクトのイメージ（deploy: Deployment, rs: ReplicaSet）
 
 
 ### なぜコントローラーを使うか？
 
-コントローラーと、それに対応する「上位」のリソースを使うことで、複数の「下位の」リソースをまとめて管理できます。
+コントローラーと、それに対応する「上位」のオブジェクトを使うことで、複数の「下位の」オブジェクトをまとめて管理できます。
 
 例えば、大量のトラフィックを捌くため、たくさんの Pod をデプロイしたい時があります。
 前ページのような yaml をたくさんコピペして（場合によっては100個以上！）、`caddy-1`, `caddy-2` とそれぞれ Pod に名付け、管理するのは大変です。
 （複数 Pod に同じ名前を付けることはできません。KVS で管理するためです。）
 
-ここで Deployment リソースを使うことで、たくさんの Pod を一気に管理できます。
-Deployment は複数の ReplicaSet リソースを管理し、ReplicaSet は複数の Pod リソースを管理します。
+ここで Deployment オブジェクトを使うことで、たくさんの Pod を一気に管理できます。
+Deployment は複数の ReplicaSet オブジェクトを管理し、ReplicaSet は複数の Pod オブジェクトを管理します。
 
-また、Deployment などの「上位の」リソースでは、細かいアップデート方法（一度に入れ替える Pod の割合等）などを制御できます。
+また、Deployment などの「上位の」オブジェクトでは、細かいアップデート方法（一度に入れ替える Pod の割合等）などを制御できます。
 これを上手く用いることで、ダウンタイムゼロのWebサイトの更新などができます。
 
 > [!NOTE]
-> Pod リソースを直接ユーザーが定義すると、ノードに障害が起こった場合、Pod の再配置はされません。
+> Pod オブジェクトを直接ユーザーが定義すると、ノードに障害が起こった場合、Pod の再配置はされません。
 > これでは障害耐性が低くなってしまいます。
-> そのため、通常は Pod を直接定義せず、Deployment 等の「上位の」リソースを扱います。
+> そのため、通常は Pod を直接定義せず、Deployment 等の「上位の」オブジェクトを扱います。
 
 ## Deployment とは
 
-Deployment リソースは、**ステートレス**な Pod を管理するのに最もよく使われるリソースです。
+Deployment オブジェクトは、**ステートレス**な Pod を管理するのに最もよく使われるオブジェクトです。
 たくさんの Pod を管理したり、バージョン更新方法を細かく管理できます。
 
 **ステートレス**な Pod とは、他の同一 Pod（コンテナ）と「入れ替えが効く」ような Pod（コンテナ）のことです。
@@ -153,9 +153,9 @@ caddy-766687f85d-mmkl6   1/1     Running   0          6m7s
 この管理の仕方からも、各 Pod の**ステートレス**性（入れ替えが効く）を前提にしていることが伺えます。
 
 > [!NOTE]
-> 正確には、Deployment Controller が直接 Pod を管理するのではなく、その間に ReplicaSet リソースとその ReplicaSet Controller が挟まります[^2]。
+> 正確には、Deployment Controller が直接 Pod を管理するのではなく、その間に ReplicaSet オブジェクトとその ReplicaSet Controller が挟まります[^2]。
 > ただしここでは説明を簡単にするため、詳細は省略します。
-> 「Deployment リソースを定義すると、`.spec.replicas` の指定数だけ Pod が作られる」ことが理解できれば大丈夫です。
+> 「Deployment オブジェクトを定義すると、`.spec.replicas` の指定数だけ Pod が作られる」ことが理解できれば大丈夫です。
 
 [^2]: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 
@@ -180,7 +180,7 @@ http://localhost:8000/ へアクセスし、再度次の画面が見えたら成
 次に、アップデート方法の制御という Deployment のもう一つの利点を確認してみます。
 
 コンテナイメージのバージョンを更新してみましょう。
-更新するには、Deployment リソースの yaml 定義を書き換え、再度 `kubectl apply` を行います。
+更新するには、Deployment オブジェクトの yaml 定義を書き換え、再度 `kubectl apply` を行います。
 
 `./examples/4_deployment.yaml` ファイル中の、`.spec.template.spec.containers[0].image` フィールドを書き換えて、イメージのバージョンを更新してみましょう。
 
@@ -201,7 +201,7 @@ http://localhost:8000/ へアクセスし、再度次の画面が見えたら成
 - `watch -n 0.5 kubectl get pods`
     - 0.5秒ごとに `kubectl get pods` を実行します。
 
-次に、更新したリソース定義を、クラスターに登録します。
+次に、更新したオブジェクト定義を、クラスターに登録します。
 
 - `kubectl apply -f ./examples/4_deployment.yaml`
 
@@ -228,7 +228,7 @@ caddy-7b56f884f5-29gtw   0/1     ContainerCreating   0          0s
 見落としてしまったら、`caddy:2.6` と `caddy:2.7` を行き来させて、何度も確認してみましょう。
 
 Deployment Controller はデフォルトで、アップデート中も `.spec.replicas` の 75% 以上の Pod が常に `Running` であることを保証（しようと）します。
-ちなみに 75% という数値や、その他細かい挙動は Deployment リソースの定義で調整可能です。
+ちなみに 75% という数値や、その他細かい挙動は Deployment オブジェクトの定義で調整可能です。
 このアップデート機構を上手く用いることで、ゼロダウンタイムでのWebサイト更新ができます。
 
 ### お掃除
@@ -247,12 +247,12 @@ Deployment と Pod が消えることを確認します。
 Deployment ではステートレスな Pod を管理しましたが、
 **ステートフル**な Pod は **StatefulSet** を用いて管理するのが一般的です。
 
-StatefulSet リソースでは、1個以上のステートフルな Pod と、その更新順序などを細かく管理できます。
+StatefulSet オブジェクトでは、1個以上のステートフルな Pod と、その更新順序などを細かく管理できます。
 
 ここでは [redis](https://hub.docker.com/_/redis) をステートフルなアプリケーションの例として使います。
 （Redis は内部で状態を持っており、特に永続化する場合は、同じ役割のコンテナが同時に存在すると困ります。）
 
-1 つの Redis の Pod を管理する、最小の StatefulSet リソースを書いていきます。
+1 つの Redis の Pod を管理する、最小の StatefulSet オブジェクトを書いていきます。
 
 ```yaml
 apiVersion: apps/v1
@@ -302,7 +302,7 @@ spec:
 ```
 
 Deployment と同じフィールドは説明を省きますが、一つ必須なフィールドが増えました。
-また、`---` で区切られて、Service というリソースが同時に定義されています。
+また、`---` で区切られて、Service というオブジェクトが同時に定義されています。
 
 - `.spec.serviceName` : Pod にアクセスするための Service 名。クラスター内コンテナから、StatefulSet に通信する時は、このサービス名を通して解決する。（例: `redis:6379`）
 - Service : クラスター内コンテナから、Pod に直IP以外でアクセスするために必要。Service について詳しくは後述。
@@ -312,7 +312,7 @@ Deployment と同じフィールドは説明を省きますが、一つ必須な
 次のコマンドで、StatefulSet と Service をクラスターに登録します。
 
 - `kubectl apply -f ./examples/4_statefulset.yaml`
-    - `---` で区切っているため、複数リソースを1ファイルから登録できます。
+    - `---` で区切っているため、複数オブジェクトを1ファイルから登録できます。
 
 StatefulSet と Service が登録されたことを確認します。
 

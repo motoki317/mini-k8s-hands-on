@@ -45,17 +45,17 @@ MariaDB はファイルの永続化が必要な、ステートフルなアプリ
 `mariadb` イメージの詳しい使い方は、[mariadb | Docker Hub](https://hub.docker.com/_/mariadb) のドキュメントを参照してください。
 Docker Hub のドキュメントには、コンテナ内のどのパスを永続化したら良いのか、また初期パスワードの設定方法などが書かれています。
 
-デプロイすべきリソースが分かりましたか？
+デプロイすべきオブジェクトが分かりましたか？
 
 一例を [../examples/8_traq/mariadb.yaml](../examples/8_traq/mariadb.yaml) に示します。
 
-以下が必要なリソースの一例です。
+以下が必要なオブジェクトの一例です。
 
 - StatefulSet と対応する Service
 - PVC
 - 機微情報を環境変数に渡すための Secret
     - 再度ですが、一般に、Secret は別手段で管理することが多いです。
-    - 今回はシンプルさのため、そのまま他のリソースとともに yaml の定義を置いています。
+    - 今回はシンプルさのため、そのまま他のオブジェクトとともに yaml の定義を置いています。
 
 > [!NOTE]
 > 上の例がたった一つの正解ではありません。
@@ -81,7 +81,7 @@ traQ のバックエンド及びフロントエンドは、ビルド済みの Do
 
 正解の一例を [../examples/8_traq/traq.yaml](../examples/8_traq/traq.yaml) に示します。
 
-以下が必要なリソースの一例です。
+以下が必要なオブジェクトの一例です。
 
 - StatefulSet と対応する Service
 - 永続化のための PVC
@@ -107,7 +107,7 @@ traQ バックエンドを含む、特定のアプリケーションで読み取
 [^2]: https://kubernetes.io/docs/tutorials/services/connect-applications-service/#accessing-the-service
 
 > [!NOTE]
-> Tips: リソースの yaml 定義は長くなることがあります。
+> Tips: オブジェクトの yaml 定義は長くなることがあります。
 > 意味的に区切れる / 自身で分かりやすいと思った箇所で、適宜空行を入れると読みやすくなります。
 
 ### フロントエンドをデプロイする
@@ -119,7 +119,7 @@ traQ のフロントエンドをデプロイしましょう。
 
 正解の一例を [../examples/8_traq/traq-ui.yaml](../examples/8_traq/traq-ui.yaml) に示します。
 
-以下が必要なリソースの一例です。
+以下が必要なオブジェクトの一例です。
 
 - Deployment
 - Service
@@ -178,20 +178,20 @@ traQ ドキュメントの Caddyfile と同等なルーティングを設定し�
 
 Anchor を過剰に使うと読みづらくなってしまいますが、適切に使うことで記述の重複を減らし、変更漏れを防止できます。
 
-### リソース定義を kustomize でまとめる
+### オブジェクト定義を kustomize でまとめる
 
-ここまで、4 つの yaml ファイルと、それぞれのファイルの中には多くのリソースが登場しました。
+ここまで、4 つの yaml ファイルと、それぞれのファイルの中には多くのオブジェクトが登場しました。
 今回は 4 つのファイルをそれぞれ `kubectl apply` すれば大丈夫ですが、もっと増えると大変です。
 
 ここで登場するのが、kustomize[^1] です。
-Kustomize は複数の Kubernetes リソース定義をまとめて、「ビルド」を行います。
+Kustomize は複数の Kubernetes オブジェクト定義をまとめて、「ビルド」を行います。
 また、この過程で簡単なフィールドの置換も行えますが、今回はやりません。
 
 Kustomize は kubectl コマンドに同梱されているため、インストールの必要はありません。
 
 [^1]: https://github.com/kubernetes-sigs/kustomize
 
-基本的な使い方は簡単で、リソース定義の yaml が入ったディレクトリーに、`kustomization.yaml` を以下のような内容で配置します。
+基本的な使い方は簡単で、オブジェクト定義の yaml が入ったディレクトリーに、`kustomization.yaml` を以下のような内容で配置します。
 
 ```yaml
 resources:
@@ -203,7 +203,7 @@ resources:
 
 これだけで、kustomize を使う準備は完了です。
 
-次のコマンドで「ビルド」を行うと、`kustomization.yaml` で列挙したリソース定義が、全て繋がって標準出力に出てきます！
+次のコマンドで「ビルド」を行うと、`kustomization.yaml` で列挙したオブジェクト定義が、全て繋がって標準出力に出てきます！
 
 - `kubectl kustomize ./examples/8_traq`
 
@@ -215,7 +215,7 @@ data:
 ...
 ```
 
-この出力を確認して、そのまま `kubectl apply` に渡してやると、一発で全てのリソースをクラスターに適用できます。
+この出力を確認して、そのまま `kubectl apply` に渡してやると、一発で全てのオブジェクトをクラスターに適用できます。
 
 - `kubectl kustomize ./examples/8_traq | kubectl apply -f -`
 - もしくは、`kubectl apply -k ./examples/8_traq` でも同等
@@ -236,11 +236,11 @@ statefulset.apps/traq created
 ingress.networking.k8s.io/traq created
 ```
 
-各リソースの状況を見て、正常に動作しているかを確認しましょう。
+各オブジェクトの状況を見て、正常に動作しているかを確認しましょう。
 
 - `kubectl get pods`
 - `kubectl get ingress`
-- ... その他のリソースも適宜確認しましょう。
+- ... その他のオブジェクトも適宜確認しましょう。
 
 ### アプリケーションの動作を確認する
 
@@ -248,18 +248,18 @@ http://traq.local.trapti.tech/ へ手元のブラウザからアクセスしま�
 
 全て上手くいっていれば、`id: traq, pass: traq` でログインして、アプリケーションが使えるはずです。
 
-もし上手くいかなければ、`kubectl get リソース名` でリソースの状況をチェックして、起動に失敗しているコンテナや、動いていないリソースが無いかを確認しましょう。
+もし上手くいかなければ、`kubectl get オブジェクト名` でオブジェクトの状況をチェックして、起動に失敗しているコンテナや、動いていないオブジェクトが無いかを確認しましょう。
 
 ![traq](../images/8_traq.png)
 
 ### お掃除
 
-次のコマンドで、**全てのリソース**を削除できます。
+次のコマンドで、**全てのオブジェクト**を削除できます。
 PVC も含まれているため、**永続化したボリューム**の内容も削除されることに気をつけてください。
 
 - `kubectl delete -k ./examples/8_traq`
 
-PVC だけは残して Pod だけを落としたい場合、必要なリソースだけを選択して削除することで可能です。
+PVC だけは残して Pod だけを落としたい場合、必要なオブジェクトだけを選択して削除することで可能です。
 
 - `kubectl delete statefulset traq`
 - `kubectl delete deployment traq-ui`
@@ -284,7 +284,7 @@ PVC だけは残して Pod だけを落としたい場合、必要なリソー�
 
 逆に言えば、これで手元の環境はほとんど汚れずにハンズオンを完了できました。
 
-Kubernetes は「宣言的」にリソースを管理するため、環境の再現やシャットダウンがたいへん楽です。
+Kubernetes は「宣言的」にオブジェクトを管理するため、環境の再現やシャットダウンがたいへん楽です。
 これを俗に Build & Scrap と言ったりします。
 どんどん仮想環境を作って壊して学びましょう。
 
