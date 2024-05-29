@@ -122,7 +122,7 @@ Forwarding from 127.0.0.1:8000 -> 80
 Forwarding from [::1]:8000 -> 80
 ```
 
-https://localhost:8000/ にブラウザからアクセスし、次のWebページが見えたら成功です。
+http://localhost:8000/ にブラウザからアクセスし、次のWebページが見えたら成功です。
 
 ![caddy-hello-world](../images/3_caddy_hello_world.png)
 

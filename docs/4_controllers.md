@@ -161,7 +161,7 @@ caddy-766687f85d-mmkl6   1/1     Running   0          6m7s
 最も基本的なロードバランシングです。
 （正確な挙動は、次ページの Service, Ingress の項で説明します。）
 
-https://localhost:8000/ へアクセスし、再度次の画面が見えたら成功です。
+http://localhost:8000/ へアクセスし、再度次の画面が見えたら成功です。
 
 ![caddy-hello-world](../images/3_caddy_hello_world.png)
 
