@@ -273,8 +273,8 @@ PersistentVolume[^2] は、Volume をより抽象化したリソースです。
 [^2]: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 
 PersistentVolume（以下、PV）リソースは、ディスクなどの Volume 資源を表します。
-1 つ以上の PersistentVolumeClaim（以下、PVC）リソースを使い、PV（の一部）を Volume として確保することを表します。
-PVC によって確保された Volume を、Pod へ Volume Mount することができます。
+PersistentVolumeClaim（以下、PVC）リソースを使って、PV（の一部）を Volume として確保できます。
+PVC によって確保された Volume を、Pod へ Volume Mount できます。
 
 実際の記述例を見てみましょう。
 
@@ -326,7 +326,7 @@ PVC の定義を少し解説します。
 StorageClass という単語が出てきました。
 
 PV / PVC も、実は「プロバイダー依存」のリソースです。
-StorageClass リソースは、PV / PVC の「プロバイダー実装」を表します。
+StorageClass リソースは、特定の「プロバイダー実装」の PV / PVC を表します。
 （Ingress と IngressClass を思い出すと、似た概念であることがわかります。）
 
 先ほどは hostPath で Worker node のパスを直接 Volume Mount しました。
@@ -339,7 +339,7 @@ StorageClass リソースは、PV / PVC の「プロバイダー実装」を表�
 したがってノードに障害が起きたとしても、多くのクラウドではブロックボリュームは別のリソースとして確保されているため、ボリュームにまで影響は及びません。
 別ノードにブロックボリュームを再アタッチし、Pod をそのノードにデプロイし直すことができます。
 
-また、PV を手動で定義することもありますが、PVC のみの定義で動的に PV が作られる StorageClass も多いです[^3]。
+また、PV を手動で定義することもありますが、通常は StorageClass 実装を通じて、PVC から動的に PV が作られます[^3]。
 
 [^3]: https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes?hl=ja#dynamic_provisioning
 
@@ -349,6 +349,7 @@ PV / PVC はプロバイダー依存のリソースであり、その安定性�
 
 したがって、オンプレミスの Kubernetes クラスターや、今回のハンズオンのように手元で動かしているクラスターでは、こうした耐障害性の高い StorageClass 実装をすぐには利用できません。
 自身で StorageClass 実装を提供する必要があります。
+（正確には、StorageClass と、それに紐づく provisioner 実装を提供する必要があります。）
 
 こうした環境で利用できる StorageClass 実装では、次のようなものがあります。
 

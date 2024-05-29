@@ -6,21 +6,31 @@
 
 KVS では、いくつかのリソースの「種類」（例: Pod, Deployment, Service, ...）と、名前に紐づくリソースの定義（yaml で書くことが多い）を管理します。
 
-> [!NOTE]
-> この KVS の実装は、[MySQL](https://www.mysql.com/) や [SQLite](https://www.sqlite.org/) だったり、[etcd](https://etcd.io/) だったりしますが、普段気にすることはありません。
+この KVS を、Kubernetes では「**API Server**」を通じて操作します。
+API Server は、単なる RESTful な HTTP API サーバーです。
+`kubectl` CLI は、この API Server へリクエストを送ることによって動作します。
 
-コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはある「上位の」リソース（例: Deployment）を監視し、そこから導かれる「下位の」リソース（例: ReplicaSet）を KVS に登録または削除（つまり、管理）します。
-いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づき、最終的には Pod が定義され、コンテナ達がデプロイされます。[^1]
+> [!NOTE]
+> KVS の実装は [MySQL](https://www.mysql.com/) や [SQLite](https://www.sqlite.org/) だったり、[etcd](https://etcd.io/) だったりします。
+> 普段 Kubernetes を使う上で、この詳細を気にすることはありません。
+
+コントローラーとは、クラスターの状態を常に監視し、理想状態へ近づけるロジックのことです[^1]。
+
+コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはあるリソース（例: Deployment）や状態を監視し、そこから導かれる別のリソース（例: ReplicaSet）を管理したり、必要な場合はクラスター外部の状態を管理します。
+
+いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づきます。
+最終的には Pod が定義され、コンテナ達がデプロイされます。
 
 [^1]: https://kubernetes.io/docs/concepts/workloads/controllers/
 
 > [!NOTE]
 > 各種コントローラーは Kubernetes の内部コンポーネントとして埋め込まれています。
-> また、自分でも独自の「Kubernetes コントローラー」を作ることができますが、それはもう少し難しいので後の話。
+> 独自の「Kubernetes コントローラー」を自作もできますが、それはもう少し難しいので後の話。
 
 ![argocd objects](../images/0_argocd_objects.png)
 
 ArgoCDの管理画面 - 「上位」と「下位」のリソースのイメージ（deploy: Deployment, rs: ReplicaSet）
+
 
 ### なぜコントローラーを使うか？
 
