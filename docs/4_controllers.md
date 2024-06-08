@@ -16,12 +16,12 @@ API Server は、単なる RESTful な HTTP API サーバーです。
 
 コントローラーとは、クラスターの状態を常に監視し、理想状態へ近づけるロジックのことです[^1]。
 
-コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはあるオブジェクト（例: Deployment）や状態を監視し、そこから導かれる別のオブジェクト（例: ReplicaSet）を管理したり、必要な場合はクラスター外部の状態を管理します。
+[^1]: https://kubernetes.io/docs/concepts/architecture/controller/
+
+コントローラーにはいくつか種類があり（例: Deployment Controller）、それぞれのコントローラーはあるオブジェクト（例: Deployment）や状態を監視し、そこから導かれる別のオブジェクト（例: ReplicaSet）や、必要に応じてクラスター外部の状態を管理します。
 
 いくつかのコントローラー達が協調することにより、クラスターの状態は「理想状態」に近づきます。
 最終的には Pod が定義され、コンテナ達がデプロイされます。
-
-[^1]: https://kubernetes.io/docs/concepts/workloads/controllers/
 
 > [!NOTE]
 > 各種コントローラーは Kubernetes の内部コンポーネントとして埋め込まれています。
@@ -29,8 +29,7 @@ API Server は、単なる RESTful な HTTP API サーバーです。
 
 ![argocd objects](../images/0_argocd_objects.png)
 
-ArgoCDの管理画面 - 「上位」と「下位」のオブジェクトのイメージ（deploy: Deployment, rs: ReplicaSet）
-
+ArgoCDの管理画面 - Deployment によって管理される ReplicaSet・ReplicaSet によって管理される Pod のイメージ
 
 ### なぜコントローラーを使うか？
 
