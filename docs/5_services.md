@@ -59,12 +59,6 @@ Service の定義すべきフィールドはそこまで多くありません。
 Service はセレクターによって宛先 Pod 一覧を取得しますが、この宛先 Pod 一覧は、Pod の変化に伴って、常に**動的に再計算されます**。
 つまり、Service のセレクターに一致する Pod を Deployment などで変化させることで、Service には手を加えずに、Service の宛先 Pod 一覧を動的に変更できるということです。
 
-> [!NOTE]
-> ボーナス知見: この「Service の宛先 Pod 一覧」は EndpointSlice[^2] というオブジェクトによって管理されています。
-> この Slice という単語は、Kubernetes が Go 言語で書かれており、Go 言語でリストを表すのに使う「スライス」から来ています。
-
-[^2]: https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/
-
 したがって、常にセレクターにマッチする Ready 状態の Pod を絶やさないことにより、**Service にダウンタイムを発生させないように**できます。
 前ページで説明した、Deployment のアップデート戦略と組み合わせるのが一般的です。
 
