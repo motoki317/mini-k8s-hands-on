@@ -31,6 +31,11 @@ Docker や Kubernetes などのコンテナ環境は、主に Linux 環境を想
 - macOS: [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) をインストール
 - Linux: [Docker Engine](https://docs.docker.com/engine/install/ubuntu/) をインストール
 
+ハンズオンの過程で Docker コンテナからホストのネットワークにアクセスする必要が生じる場合があります。
+Docker Desktop 4.34.0 以上をお使いの方は、
+[Docker のドキュメント](https://docs.docker.com/engine/network/drivers/host/#docker-desktop)
+に従って host networking を有効化しておくことをおすすめします。
+
 検証時: Docker Engine - Community 26.1.2
 
 ## kubectl
