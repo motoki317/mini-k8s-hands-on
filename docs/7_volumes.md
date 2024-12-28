@@ -171,7 +171,7 @@ spec:
 - `mysql -h127.0.0.1 -uroot -ppassword`
 
 > [!NOTE]
-> Docker Desktop を使用した環境では `127.0.0.1` の代わりに `host.docker.internal` を指定してください。
+> Docker Desktop 4.34.0 未満を使用している場合は `127.0.0.1` の代わりに `host.docker.internal` を指定してください。
 
 ```plaintext
 # mysql -h127.0.0.1 -uroot -ppassword

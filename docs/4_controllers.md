@@ -378,7 +378,7 @@ Pod の名前は、Deployment のランダムな suffix の管理と違い、`{S
     - もしくは redis-cli が手元にある場合は、単に `redis-cli -h localhost`
 
 > [!NOTE]
-> Docker Desktop を使用した環境では `localhost` の代わりに `host.docker.internal` を指定してください。
+> Docker Desktop 4.34.0 未満を使用している場合は `localhost` の代わりに `host.docker.internal` を指定してください。
 
 次のような動作が確認できれば成功です。
 
