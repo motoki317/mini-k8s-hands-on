@@ -170,6 +170,9 @@ spec:
 
 - `mysql -h127.0.0.1 -uroot -ppassword`
 
+> [!NOTE]
+> Docker Desktop を使用した環境では `127.0.0.1` の代わりに `host.docker.internal` を指定してください。
+
 ```plaintext
 # mysql -h127.0.0.1 -uroot -ppassword
 mysql: [Warning] Using a password on the command line interface can be insecure.
